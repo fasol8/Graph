@@ -1,7 +1,9 @@
 let graphData = [];
+let graphDataPositive = [];
 let sortGraphData;
 let dates = [];
 let preassures = [];
+let dataplus = []
 let data = []
 
 const btnSelectFile = document.querySelector('#fileTxt');
@@ -49,12 +51,29 @@ document.getElementById("fileTxt").addEventListener("change", function(ev) {
                 let date = rowValues[0];
                 let preassure = rowValues[2];
                 if (!(isNaN(preassure))) {
-                    graphData.push({
-                        'date': date,
-                        'preassure': Number(preassure),
-                        // 'preassure': Number(preassure.split('E')[0]),
-                        // 'multi': preassure.split('E')[1],
-                    });
+                    if (Math.sign(Number(preassure.split('E')[1])) == 1) {
+                        // POSITIVE mbar
+                        graphData.push({
+                            'date': date,
+                            'preassure': null,
+                        });
+                        graphDataPositive.push({
+                            'date': date,
+                            'preassure': Number(preassure),
+                        });
+
+                    } else {
+                        // Negative mbar
+                        graphData.push({
+                            'date': date,
+                            'preassure': Number(preassure),
+
+                        });
+                        graphDataPositive.push({
+                            'date': date,
+                            'preassure': null,
+                        });
+                    }
                 }
             }
         }
@@ -83,19 +102,28 @@ const renderGraph = () => {
 
     data = graphData.map(element => element.preassure);
     dates = graphData.map(element => element.date)
+    dataplus = graphDataPositive.map(element => element.preassure)
         // multis = graphData.map(element => element.multi)
 
     console.time('line');
     Highcharts.chart('graphCanvas', {
 
         series: [{
-            data: data,
-            lineWidth: 0.5,
-            name: 'Hourly data points'
-        }],
+                data: data,
+                lineWidth: 0.5,
+                name: 'Negative mbar'
+            },
+            {
+                visible: false,
+                name: 'Positive mbar',
+                data: dataplus,
+                lineWidth: 0.5
+            }
+        ],
 
         chart: {
             zoomType: 'x',
+            height: 35 + '%',
             resetZoomButton: {
                 theme: {
                     fill: 'white',
