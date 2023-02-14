@@ -46,6 +46,7 @@ const sortData = (dataSet) => {
 btnSelectFile.addEventListener("change", function(evt){
 
     series = [];
+    readers = [];
         
     initReaders(evt.currentTarget.files);
 
@@ -79,10 +80,9 @@ const downloadFile = () => {
       };
 
 const renderGraph = (dataSet) => {
-    console.log(dataSet);
     let utcFormattedData = dataSet.map( element => (element[0]));
     let data = dataSet.map( element => (element[1]));
-    Highcharts.chart('graphCanvas', {
+    let chart1 = Highcharts.chart('graphCanvas', {
         title: {
             text: 'Programa para recuperacion y lectura de la bitacora de vacío del equipo de XPS '
         },
@@ -117,4 +117,7 @@ const renderGraph = (dataSet) => {
             }
         }
     });
+
+
+    chart1.redraw();
 }
