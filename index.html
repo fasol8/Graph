@@ -2,24 +2,23 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/boost.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script> -->
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.highcharts.com/stock/highstock.js"></script>
 
     <link rel="stylesheet" href="style.css">
+    <title>Bitacora de vacio</title>
 </head>
 
 <body>
-    <button onclick = "downloadFile()"> save File </button>
+    <button onclick="downloadFile()"> save File </button>
     <input type="file" id="fileTxt" accept="text/plain" multiple>
     <hr>
     <div>
-        <!-- <div class="grid-container"> -->
         <div>
-            <!-- <div class="item2"> -->
             <figure class="highcharts-figure">
                 <div id="graphCanvas"></div>
                 <p class="highcharts-description">
@@ -31,7 +30,6 @@
     </div>
 </body>
 
-<!-- <script src="graph.js"></script> -->
-<script src="graph-refactored.js"></script>
+<script src="graph.js"></script>
 
 </html>

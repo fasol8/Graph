@@ -1,134 +1,98 @@
-let seriesTest = [];
-let graphs = [[]];
-let graphData = [];
-let sortGraphData;
-let dates = [];
-let preassures = [];
-let data = []
-
-var colors = Highcharts.getOptions().colors;
-
 const btnSelectFile = document.querySelector('#fileTxt');
 const graphCanvas = document.querySelector('#graph');
 const tableBody = document.querySelector("#tableData");
 
-function readFileAsText(file) {
+let readers = [];
+let series = [];
+
+const readFileAsText = (file) => {
     return new Promise(function(resolve, reject) {
         let fr = new FileReader();
-
         fr.onload = function() {
             resolve(fr.result);
         };
-
         fr.onerror = function() {
             reject(fr);
         };
-
         fr.readAsText(file);
     });
 }
 
-// Manejar múltiples cargas de archivos
-document.getElementById("fileTxt").addEventListener("change", function(ev) {
-    let files = ev.currentTarget.files;
-    let readers = [];
+const getFileRows = (content) => {
+    return content.split('\r\n');
+}
 
-    seriesTest = [];
+const parseRow = (row) => {
+    let values = row.split('\t');
+    if (!isNaN(values[2])) {
+        return [new Date(values[0]), Number(values[2])]
+    }
+}
 
-    // Abortar si no hubo archivos seleccionados
-    if (!files.length) return;
-
-    // Almacenar promesas en matriz
+const initReaders = (files) => {
     for (let i = 0; i < files.length; i++) {
         readers.push(readFileAsText(files[i]));
     }
+}
 
-    // Activar promesas
-    Promise.all(readers).then((values) => {
-        // Los valores serán una matriz que contiene un elemento.
-        // ["File1 Content", "File2 Content" ... "FileN Content"]
-        for (var i = 0; i < values.length; i++) {
-            let preassures = [];
-            let rows = values[i].split('\r\n');
+const sortData = (dataSet) => {
+    return dataSet.sort((date1, date2) => date1[0] - date2[0]);
+}
 
-            for (let i in rows) {
-                let rowValues = rows[i].split('\t');
-                let date = new Date(rowValues[0]);
-                let utcDate = Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds());
-                let preassure = rowValues[2];
-                if (!(isNaN(preassure))) {
-                    graphData.push([utcDate, Number(preassure)])
-                    // preassures.push(Number(preassure));
-                    // graphData.push({
-                    //     'date': date,
-                    //     'preassure': Number(preassure),
-                    //     // 'preassure': Number(preassure.split('E')[0]),
-                    //     // 'multi': preassure.split('E')[1],
-                    // });
-                }
-            }
-            seriesTest.push({
-                name: `Series ${i}`,
-                data: preassures
-            });
-        }
-        // Ornedar graphData
-        sortGraphData = graphData.sort((a, b, ) => {
-            return a.date - b.date
-        })
+btnSelectFile.addEventListener("change", function(evt) {
+    series = [];
+    readers = [];
+    initReaders(evt.currentTarget.files);
 
-        // createTable()
-        renderGraph()
-        // graphData = [];
-        sortGraphData = [];
+    Promise.all(readers).then((files) => {
+        files.forEach((file) => {
+            let rows = getFileRows(file);
+            rows.forEach((row) => {
+                let point = parseRow(row);
+                if (point != null)
+                    series.push(point);
+            })
+        });
+        renderGraph(sortData(series));
     });
 }, false);
 
-const createTable = () => {
-    let dataHtml = ''
-    for (var element of sortGraphData) {
-        dataHtml += `<tr><td>${element.date}</td><td>${element.preassure}</td></tr>`
-            // dataHtml += `<tr><td>${element.date}</td><td>${element.preassure} E${element.multi}</td></tr>`
-    }
-    tableBody.innerHTML = dataHtml
+const formatDate = (value) => {
+    return value.toISOString().slice(0, 19).replace("T", " ");
 }
 
-const renderGraph = () => {
+const downloadFile = () => {
+    const link = document.createElement("a");
+    const content = series.map(element => `${formatDate(element[0])}\t \t${element[1]}`).join("\r\n");
+    const file = new Blob([content], { type: 'text/plain' });
+    link.href = URL.createObjectURL(file);
+    link.download = prompt('Elija un nombre de archivo');
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
 
-    // data = graphData.map(element => element.preassure);
-    // dates = graphData.map(element => 
-    //     Date.UTC(element.date.getYear(),element.date.getMonth(), element.date.getDate(), element.date.getHours(),element.date.getMinutes(),element.date.getSeconds()))
-        // multis = graphData.map(element => element.multi)
-    dates = graphData.map(element => new Date(element[0]));
-    
-
-    console.time('line');
-    Highcharts.stockChart('graphCanvas', {
-
-        // series: seriesTest,
-
+const renderGraph = (dataSet) => {
+    let utcFormattedData = dataSet.map(element => (element[0]));
+    let data = dataSet.map(element => (element[1]));
+    Highcharts.chart('graphCanvas', {
+        title: {
+            text: 'Programa para recuperacion y lectura de la bitacora de vacio del equipo de XPS '
+        },
+        xAxis: {
+            categories: utcFormattedData,
+            title: { text: 'Date' }
+        },
+        yAxis: {
+            title: { text: 'Presion (mbar)' },
+            type: 'logarithmic',
+        },
         series: [{
-            data: graphData,
+            data: data,
             lineWidth: 0.5,
-            name: 'Hourly data points',
-            zoneAxis: 'x',
-
-            zones: [{
-                value: Date.UTC(2022, 1),
-                color: colors[1]
-            }, {
-                value: Date.UTC(2022, 3),
-                color: colors[4]
-            }, {
-                value: Date.UTC(2022, 11),
-                color: colors[4]
-            }, {
-                color: colors[5]
-            }]            
         }],
-
         chart: {
             zoomType: 'x',
+            height: 50 + '%',
             resetZoomButton: {
                 theme: {
                     fill: 'white',
@@ -144,53 +108,6 @@ const renderGraph = () => {
                     }
                 }
             }
-        },
-
-        title: {
-            text: 'Programa para recuperacion y lectura de la bitacora de vacío del equipo de XPS '
-        },
-
-        subtitle: {
-            text: 'Total de puntos: ' + graphData.length
-        },
-
-
-        xAxis: {
-            // categories: dates,
-            labels: {
-                rotation: -45
-            },
-            type: 'logarithmic',
-            // WORK
-            // dateTimeLabelFormats: {
-            //     month: '%e. %b',
-            //     year: '%b'
-            // },
-            title: {
-                text: 'Date'
-            }
-        },
-
-        yAxis: {
-            title: {
-                text: 'Presion (mbar)'
-            },
-            // min: 0,
-            // max: 10,
-        },
-
-        accessibility: {
-            screenReaderSection: {
-                beforeChartFormat: '<{headingTagName}>{chartTitle}</{headingTagName}><div>{chartSubtitle}</div><div>{chartLongdesc}</div><div>{xAxisDescription}</div><div>{yAxisDescription}</div>'
-            }
-        },
-
-        tooltip: {
-            // valueDecimals: 2
-            // headerFormat: '<b>{series.name}</b><br>',
-            // pointFormat: '{point.x:}: {point.y:.2f} E '
-        },
-
+        }
     });
-    console.timeEnd('line');
 }
