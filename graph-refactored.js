@@ -29,7 +29,6 @@ const parseRow = ( row ) => {
     if(!isNaN(values[2])){
         return [new Date(values[0]), Number(values[2])]
     }
-
 }
 
 const initReaders = (files) => {
@@ -77,14 +76,14 @@ const downloadFile = () => {
          link.download = prompt('Elija un nombre de archivo');
          link.click();
          URL.revokeObjectURL(link.href);
-      };
+};
 
 const renderGraph = (dataSet) => {
     let utcFormattedData = dataSet.map( element => (element[0]));
     let data = dataSet.map( element => (element[1]));
-    let chart1 = Highcharts.chart('graphCanvas', {
+    Highcharts.chart('graphCanvas', {
         title: {
-            text: 'Programa para recuperacion y lectura de la bitacora de vacío del equipo de XPS '
+            text: 'Programa para recuperacion y lectura de la bitacora de vacio del equipo de XPS '
         },
         xAxis: {
             categories: utcFormattedData,
@@ -117,7 +116,4 @@ const renderGraph = (dataSet) => {
             }
         }
     });
-
-
-    chart1.redraw();
 }
