@@ -44,7 +44,7 @@ const sortData = (dataSet) => {
 
 
 btnSelectFile.addEventListener("change", function(evt){
-    
+
     series = [];
         
     initReaders(evt.currentTarget.files);
@@ -73,7 +73,7 @@ const downloadFile = () => {
          const content = series.map(element => `${formatDate(element[0])}\t \t${element[1]}`).join("\r\n");
          const file = new Blob([content], { type: 'text/plain' });
          link.href = URL.createObjectURL(file);
-         link.download = "sample.txt";
+         link.download = prompt('Elija un nombre de archivo');
          link.click();
          URL.revokeObjectURL(link.href);
       };
