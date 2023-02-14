@@ -24,7 +24,7 @@ const getFileRows = (content) => {
     return content.split('\r\n');
 }
 
-const parseRow = (row) => {
+const parseRow = ( row ) => {
     let values = row.split('\t');
     if(!isNaN(values[2])){
         return [new Date(values[0]), Number(values[2])]
@@ -42,7 +42,10 @@ const sortData = (dataSet) => {
     return dataSet.sort((date1, date2) => date1[0] - date2[0]);
 }
 
+
 btnSelectFile.addEventListener("change", function(evt){
+    
+    series = [];
         
     initReaders(evt.currentTarget.files);
 
@@ -60,6 +63,20 @@ btnSelectFile.addEventListener("change", function(evt){
     });
 
 }, false);
+
+const formatDate = (value) => {
+    return value.toISOString().slice(0, 19).replace("T", " ");
+}
+
+const downloadFile = () => {
+         const link = document.createElement("a");
+         const content = series.map(element => `${formatDate(element[0])}\t \t${element[1]}`).join("\r\n");
+         const file = new Blob([content], { type: 'text/plain' });
+         link.href = URL.createObjectURL(file);
+         link.download = "sample.txt";
+         link.click();
+         URL.revokeObjectURL(link.href);
+      };
 
 const renderGraph = (dataSet) => {
     console.log(dataSet);
