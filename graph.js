@@ -25,7 +25,8 @@ const getFileRows = (content) => {
 const parseRow = (row) => {
     let values = row.split('\t');
     if (!isNaN(values[2])) {
-        return [new Date(values[0]), Number(values[2])]
+        let objectDate = new Date(values[0])
+        return [objectDate, Number(values[2]), objectDate.getFullYear()]
     }
 }
 
@@ -58,7 +59,9 @@ btnSelectFile.addEventListener("change", function(evt) {
 }, false);
 
 const formatDate = (value) => {
-    return value.toISOString().slice(0, 19).replace("T", " ");
+    var tzoffset = (new Date(value)).getTimezoneOffset() * 60000; //offset in milliseconds
+    var localISOTime = (new Date(value - tzoffset)).toISOString()
+    return localISOTime.slice(0, 19).replace("T", " ")
 }
 
 const downloadFile = () => {
@@ -72,23 +75,115 @@ const downloadFile = () => {
 };
 
 const renderGraph = (dataSet) => {
-    let utcFormattedData = dataSet.map(element => (element[0]));
-    let data = dataSet.map(element => (element[1]));
+    let yearData = dataSet.map(element => (element[2]))
+    let yearFirts = yearData[0]
+    let yearLast = yearData[yearData.length - 1]
+
+    let utcFormattedDataHelp = dataSet.map(element => (formatDate(element[0])));
+
     Highcharts.chart('graphCanvas', {
         title: {
             text: 'Programa para recuperacion y lectura de la bitacora de vacio del equipo de XPS '
         },
+        subtitle: {
+            text: utcFormattedDataHelp[0] + ' => ' + utcFormattedDataHelp[utcFormattedDataHelp.length - 1]
+        },
         xAxis: {
-            categories: utcFormattedData,
-            title: { text: 'Date' }
+            title: { text: 'Date' },
+            type: "datetime",
+            labels: {
+                format: '{value:%b %e}',
+            },
+            dateTimeLabelFormats: {
+                month: '%e. %b',
+                year: '%Y'
+            },
         },
         yAxis: {
             title: { text: 'Presion (mbar)' },
             type: 'logarithmic',
         },
         series: [{
-            data: data,
+            name: "Bitacora de vacio",
+            data: dataSet,
             lineWidth: 0.5,
+            pointIntervalUnit: 'month',
+            zoneAxis: 'x',
+            zones: [{
+                // INICIO AÑO
+                value: Date.UTC(yearFirts, 1),
+                color: "#F86624"
+            }, {
+                value: Date.UTC(yearFirts, 2),
+                color: "#1E1E24"
+            }, {
+                value: Date.UTC(yearFirts, 3),
+                color: "#662E9B"
+            }, {
+                value: Date.UTC(yearFirts, 4),
+                color: "#43BCCD"
+            }, {
+                value: Date.UTC(yearFirts, 5),
+                color: "#FFA987"
+            }, {
+                value: Date.UTC(yearFirts, 6),
+                color: "#6D9F71"
+            }, {
+                value: Date.UTC(yearFirts, 7),
+                color: "#CB48b7"
+            }, {
+                value: Date.UTC(yearFirts, 8),
+                color: "#08BDBD"
+            }, {
+                value: Date.UTC(yearFirts, 9),
+                color: "#FF9914"
+            }, {
+                value: Date.UTC(yearFirts, 10),
+                color: "#04724D"
+            }, {
+                value: Date.UTC(yearFirts, 11),
+                color: "#A7A2A9"
+            }, {
+                value: Date.UTC(yearFirts, 12),
+                color: "#42253B"
+            }, {
+                // ULTIMO AÑO
+                value: Date.UTC(yearLast, 1),
+                color: "#F86624"
+            }, {
+                value: Date.UTC(yearLast, 2),
+                color: "#1E1E24"
+            }, {
+                value: Date.UTC(yearLast, 3),
+                color: "#662E9B"
+            }, {
+                value: Date.UTC(yearLast, 4),
+                color: "#43BCCD"
+            }, {
+                value: Date.UTC(yearLast, 5),
+                color: "#FFA987"
+            }, {
+                value: Date.UTC(yearLast, 6),
+                color: "#6D9F71"
+            }, {
+                value: Date.UTC(yearLast, 7),
+                color: "#CB48b7"
+            }, {
+                value: Date.UTC(yearLast, 8),
+                color: "#08BDBD"
+            }, {
+                value: Date.UTC(yearLast, 9),
+                color: "#FF9914"
+            }, {
+                value: Date.UTC(yearLast, 10),
+                color: "#04724D"
+            }, {
+                value: Date.UTC(yearLast, 11),
+                color: "#A7A2A9"
+            }, {
+                value: Date.UTC(yearLast, 12),
+                color: "#42253B"
+            }, ]
         }],
         chart: {
             zoomType: 'x',
