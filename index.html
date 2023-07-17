@@ -7,14 +7,18 @@
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+
 
     <link rel="stylesheet" href="style.css">
     <title>Bitacora de vacio</title>
 </head>
 
 <body>
-    <button onclick="downloadFile()"> Save File </button>
-    <input type="file" id="fileTxt" accept="text/plain" multiple>
+    TXT => <input type="file" id="fileTxt" accept="text/plain" multiple>
+    <button onclick="downloadFile()"> Save File </button><br>
+    ZIP => <input type="file" id="fileZip" accept=".zip" multiple>
+
     <hr>
     <div>
         <div>
